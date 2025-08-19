@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clients {
+  id Int @id
+  email String @unique
+  name String
+  password String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations 
+  accounts Account[]
+  apps App[]
+
+}
+
+model Users {
+  id Int @id
+  appId Int
+
+  email String @unique
+  name String
+  emailVerified Boolean @default(false)
+  password String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  app App[]
+  account Account[]
+
+}
+
+model Account {
+  id Int @id
+  clientId Int
+  userId Int
+  provider String
+  providerAccountId String
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client Clients @relation(fields: [clientId], references: [id])
+  user Users @relation(fields: [userId], references: [id])
+  
+  @@unique([provider, providerAccountId])
+}
+
+model App {
+  id Int @id
+  clientId Int
+  name String @unique
+  description String?
+
+  // Auth settings
+  jwtSecret String @unique
+  jwtExpiresIn String @default("24h")
+
+  // OAuth settings
+  allowedProviders String[] @default([])
+  callbackUrls String[] @default([])
+
+  // Metadata
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  client Clients[]
+  users Users[]
+
+  @@unique([clientId, name])
+}
+
