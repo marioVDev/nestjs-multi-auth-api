@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Clients {
-  id Int @id
+  id String @id @default(nanoid())
   email String @unique
   name String
   password String?
@@ -48,8 +48,8 @@ model Users {
 }
 
 model Account {
-  id Int @id
-  clientId Int
+  id Int @id @default(autoincrement())
+  clientId String
   userId Int
   provider String
   providerAccountId String
