@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from './config/enviroment.config';
+import { ThrottlerModule } from '@nestjs/throttler/dist/throttler.module';
 
 @Module({
   imports: [
@@ -11,6 +12,12 @@ import { envValidationSchema } from './config/enviroment.config';
       envFilePath: '.env',
       validationSchema: envValidationSchema,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60,
+        limit: 10,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],

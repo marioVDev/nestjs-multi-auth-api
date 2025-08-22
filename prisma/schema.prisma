@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Clients {
-  id String @id @default(nanoid())
+  id String @id
   email String @unique
   name String
   password String?
@@ -31,8 +31,8 @@ model Clients {
 }
 
 model Users {
-  id Int @id
-  appId Int
+  id String @id
+  appId String
 
   email String @unique
   name String
@@ -48,9 +48,9 @@ model Users {
 }
 
 model Account {
-  id Int @id @default(autoincrement())
+  id String @id
   clientId String
-  userId Int
+  userId String
   provider String
   providerAccountId String
 
@@ -75,7 +75,7 @@ model App {
   jwtExpiresIn String @default("24h")
 
   // OAuth settings
-  allowedProviders String[] @default([])
+  allowedProviders String[] @default(["google", "github"])
   callbackUrls String[] @default([])
 
   // Metadata
