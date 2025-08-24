@@ -15,42 +15,48 @@ datasource db {
 }
 
 model Clients {
-  id String @id
+  id String @id @default(cuid())
   email String @unique
   name String
   password String?
+  plan String @default("free")
 
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations 
-  accounts Account[]
-  apps App[]
+  accounts ClientAccount[]
+  app App[]
 
+  @@map("clients")
 }
 
 model Users {
-  id String @id
+  id String @id @default(cuid())
   appId String
 
-  email String @unique
+  email String
   name String
   emailVerified Boolean @default(false)
   password String?
-  
+
+  // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  app App[]
-  account Account[]
 
+  // Relations
+  account UserAccount[]
+  app App @relation(fields: [appId], references: [id])
+
+ // validation
+  @@unique([email, appId])
+  @@map("users")
 }
 
-model Account {
-  id String @id
+model ClientAccount {
+  id String @id @default(cuid())
   clientId String
-  userId String
   provider String
   providerAccountId String
 
@@ -59,15 +65,33 @@ model Account {
   updatedAt DateTime @updatedAt
 
   client Clients @relation(fields: [clientId], references: [id])
+  
+  @@unique([provider, providerAccountId])
+  @@unique([clientId, providerAccountId])
+  @@map("client_accounts")
+}
+
+model UserAccount {
+  id String @id @default(cuid())
+  userId String
+  provider String
+  providerAccountId String
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user Users @relation(fields: [userId], references: [id])
   
   @@unique([provider, providerAccountId])
+  @@unique([userId, providerAccountId])
+  @@map("user_accounts")
 }
 
 model App {
-  id Int @id
-  clientId Int
-  name String @unique
+  id String @id @default(cuid())
+  clientId String
+  name String
   description String?
 
   // Auth settings
@@ -83,9 +107,11 @@ model App {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  client Clients[]
+  //Relations
+  client Clients @relation(fields: [clientId], references: [id])
   users Users[]
 
   @@unique([clientId, name])
+  @@map("apps")
 }
 
