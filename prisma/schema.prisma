@@ -100,7 +100,6 @@ model App {
 
   // OAuth settings
   allowedProviders String[] @default(["google", "github"])
-  callbackUrls String[] @default([])
 
   // Metadata
   isActive Boolean @default(true)
