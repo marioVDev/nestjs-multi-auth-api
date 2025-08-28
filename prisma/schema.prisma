@@ -99,7 +99,7 @@ model App {
   jwtExpiresIn String @default("24h")
 
   // OAuth settings
-  allowedProviders String[] @default(["google", "github"])
+  allowedProviders String[] @default(["google", "github", "local"])
 
   // Metadata
   isActive Boolean @default(true)
