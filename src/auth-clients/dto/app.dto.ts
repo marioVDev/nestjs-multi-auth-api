@@ -1,13 +1,24 @@
+import { IsString } from 'class-validator';
+
 /**
  * Data Transfer Object for creating a new app
  */
-export class RegisterAppDto {
-  id?: string;
-  clientId?: string;
+export class CreateAppDto {
+  @IsString()
+  clientId: string;
+
+  @IsString()
   name: string;
-  description: string;
-  jwtSecret?: string;
-  jwtExpiresIn?: string;
-  allowedProviders?: string[];
-  callbackUrls: string[];
+
+  @IsString()
+  description?: string;
+
+  @IsString()
+  plan?: string;
+
+  @IsString()
+  jwtSecret: string;
+
+  @IsString()
+  jwtExpiresIn: string;
 }
