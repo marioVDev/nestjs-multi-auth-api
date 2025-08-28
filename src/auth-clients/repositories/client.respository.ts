@@ -1,18 +1,90 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/db/prisma.service';
-import { RegisterClientDto } from '../dto/client.dto';
+import { CreateClientAccountDto, CreateClientDto } from '../dto/client.dto';
+import { BaseRepository } from './base.repository';
+import { Prisma } from 'generated/prisma';
 
+/**
+ * Client repository for managing client data
+ * @extends BaseRepository
+ * @param prisma - The Prisma service instance
+ */
 @Injectable()
-export class ClientRepository {
-  constructor(private prisma: PrismaService) {}
+export class ClientRepository extends BaseRepository {
+  constructor(readonly prisma: PrismaService) {
+    super(prisma);
+  }
 
-  async createClient(data: RegisterClientDto) {
-    const { id, email, name } = data;
+  /**
+   * Create a new client
+   * @param data - The client data
+   * @returns The created client
+   */
+  async createClient(
+    data: CreateClientDto,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const { email, name, password, plan } = data;
 
-    if (!id || !email || !name) {
-      throw new Error('Email and name are required');
-    }
+    const client = await this.transaction(prismaClient).clients.create({
+      data: { email, name, password, plan },
+    });
 
-    return await this.prisma.clients.create({ data: { id, email, name } });
+    return client;
+  }
+
+  /**
+   * Get a client by email
+   * @param email - The email of the client
+   * @returns The found client or null
+   */
+  async getClientByEmail(email: CreateClientDto['email']) {
+    const client = await this.prisma.clients.findUnique({
+      where: { email },
+    });
+
+    return client;
+  }
+}
+
+/**
+ * Client account repository for managing client account data
+ */
+export class ClientAccountRepository extends BaseRepository {
+  constructor(readonly prisma: PrismaService) {
+    super(prisma);
+  }
+
+  public async createClientAccount(
+    clientId: string,
+    data: CreateClientAccountDto,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const { provider, providerAccountId } = data;
+
+    const clientAccount = await this.transaction(
+      prismaClient,
+    ).clientAccount.create({
+      data: { clientId, provider, providerAccountId },
+    });
+
+    return clientAccount;
+  }
+
+  /**
+   * Get a client account by provider and provider account ID
+   * @param data - The client account data
+   * @returns The found client account or null
+   */
+  public async getClientAccountByProviderAndProviderId(
+    data: CreateClientAccountDto,
+  ) {
+    const { provider, providerAccountId } = data;
+
+    const clientAccount = await this.prisma.clientAccount.findUnique({
+      where: { provider_providerAccountId: { provider, providerAccountId } },
+    });
+
+    return clientAccount;
   }
 }
