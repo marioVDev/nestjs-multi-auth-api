@@ -33,7 +33,7 @@ export class CreateClientDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
     message: 'Password must contain uppercase, lowercase and number',
   })
-  password: string;
+  password: string | null;
 
   @IsString()
   @IsNotEmpty()
