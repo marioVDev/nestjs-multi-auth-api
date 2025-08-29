@@ -8,12 +8,25 @@ import {
   IsOptional,
 } from 'class-validator';
 
+/**
+ * Interface manage data to register in database
+ */
+export interface ClientRegistrationData
+  extends CreateClientDto,
+    CreateClientAccountDto {}
+
+/**
+ * Enum for manage subscription plans and validations
+ */
 export enum PlanType {
   FREE = 'free',
   PREMIUM = 'premium',
   ENTERPRISE = 'enterprise',
 }
 
+/**
+ * Enum for managing OAuth providers
+ */
 export enum Provider {
   GOOGLE = 'google',
   GITHUB = 'github',
