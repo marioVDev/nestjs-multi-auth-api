@@ -3,7 +3,6 @@ import {
   ClientRepository,
   ClientAccountRepository,
 } from './client.respository';
-import { AppRepository } from './app.repository';
 import { CreateClientDto, CreateClientAccountDto } from '../dto/client.dto';
 import { PrismaService } from 'src/db/prisma.service';
 import { ConflictException } from '@nestjs/common';
@@ -17,10 +16,9 @@ interface ClientRegistrationData
  * Transaction repository for managing database transactions
  */
 @Injectable()
-export class TransactionRepository {
+export class TransactionOAuthRepository {
   constructor(
     private clientRepository: ClientRepository,
-    private appRepository: AppRepository,
     private readonly prisma: PrismaService,
     private clientAccountRepository: ClientAccountRepository,
   ) {}
