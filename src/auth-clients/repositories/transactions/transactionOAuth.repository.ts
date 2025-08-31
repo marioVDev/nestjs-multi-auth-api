@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/db/prisma.service';
 import { ConflictException } from '@nestjs/common';
 import { Provider } from '../../dto/client.dto';
+import { Clients, ClientAccount } from 'generated/prisma';
+
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import {
   ClientRepository,
@@ -13,6 +19,21 @@ import {
   CreateClientAccountDto,
   CreateClientDto,
 } from '../../dto/client.dto';
+
+export type ResultOAuthOptions =
+  | {
+      newClient: Clients;
+    }
+  | {
+      newAccount: ClientAccount;
+      client: Clients;
+      isNewAccount: boolean;
+    }
+  | {
+      client: Clients;
+      existingAccount: ClientAccount;
+      isNewAccount: boolean;
+    };
 
 /**
  * Transaction repository for managing database transactions
@@ -38,7 +59,7 @@ export class TransactionOAuthRepository {
     } else if (provider === Provider.GOOGLE || provider === Provider.GITHUB) {
       return this.handleOAuthRegistration(data);
     } else {
-      throw new Error('Unsupported provider');
+      throw new InternalServerErrorException('Unsupported provider');
     }
   }
 
@@ -104,17 +125,20 @@ export class TransactionOAuthRepository {
       );
 
     if (existingAccount) {
-      return { existingAccount, isNewAccount: false };
+      const client = await this.getClientById(idUser);
+      return { client, existingAccount, isNewAccount: false };
     }
 
     return this.prisma.$transaction(async (tx) => {
-      await this.clientAccountRepository.createClientAccount(
+      const account = await this.clientAccountRepository.createClientAccount(
         idUser,
         accountData,
         tx,
       );
 
-      return { user: idUser, isNewAccount: true };
+      const client = await this.getClientById(idUser);
+
+      return { newAccount: account, client, isNewAccount: true };
     });
   }
 
@@ -137,7 +161,17 @@ export class TransactionOAuthRepository {
         tx,
       );
 
-      return client;
+      return { newClient: client };
     });
+  }
+
+  private async getClientById(id: string) {
+    const client = await this.clientRepository.getClientById({ id });
+
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+
+    return client;
   }
 }

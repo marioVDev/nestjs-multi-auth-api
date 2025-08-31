@@ -91,3 +91,17 @@ export class CreateClientAccountDto {
   @IsString()
   providerAccountId: string;
 }
+
+export class LoginClientDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @IsNotEmpty()
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+    message: 'Password must contain uppercase, lowercase and number',
+  })
+  password: string;
+}

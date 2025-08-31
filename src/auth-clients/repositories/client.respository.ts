@@ -45,6 +45,19 @@ export class ClientRepository extends BaseRepository {
 
     return client;
   }
+
+  /**
+   * Get a client by id
+   * @param data - The client id
+   * @returns The found client or null
+   */
+  public async getClientById(data: Pick<Prisma.ClientsWhereUniqueInput, 'id'>) {
+    const client = await this.prisma.clients.findUnique({
+      where: { id: data.id },
+    });
+
+    return client;
+  }
 }
 
 /**
