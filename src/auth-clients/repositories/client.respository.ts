@@ -63,6 +63,7 @@ export class ClientRepository extends BaseRepository {
 /**
  * Client account repository for managing client account data
  */
+@Injectable()
 export class ClientAccountRepository extends BaseRepository {
   constructor(readonly prisma: PrismaService) {
     super(prisma);
