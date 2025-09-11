@@ -65,9 +65,9 @@ model ClientAccount {
   updatedAt DateTime @updatedAt
 
   client Clients @relation(fields: [clientId], references: [id])
-  
-  @@unique([provider, providerAccountId])
-  @@unique([clientId, providerAccountId])
+
+  @@unique([provider, providerAccountId], name: "provider_providerAccountId")
+  @@unique([clientId, providerAccountId], name: "clientId_providerAccountId")
   @@map("client_accounts")
 }
 
