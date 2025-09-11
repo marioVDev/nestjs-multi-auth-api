@@ -5,6 +5,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { Express } from 'express';
 import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -37,7 +40,7 @@ async function bootstrap() {
   );
 
   // Server initialization
-  await app.listen(process.env.PORT ? Number(process.env.PORT) : 2000);
+  await app.listen(process.env.API_PORT ? Number(process.env.API_PORT) : 4000);
   const url = await app.getUrl();
   console.log(`Application is running on: ${url}`);
 }
