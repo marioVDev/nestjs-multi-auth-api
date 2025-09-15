@@ -1,5 +1,5 @@
 import { PrismaService } from 'src/db/prisma.service';
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Provider } from '../../dto/client.dto';
 import { Clients, ClientAccount } from 'generated/prisma';
 
@@ -71,11 +71,16 @@ export class TransactionOAuthRepository {
   private async handleLocalRegistration(data: ClientRegistrationData) {
     const { email, name, password, plan, provider, providerAccountId } = data;
 
-    const existingUser = await this.clientRepository.getClientByEmail(email);
+    const existingClient = await this.clientRepository.getClientByEmail(email);
 
-    if (existingUser) {
-      throw new ConflictException('User already exists');
+    // Si existe cliente y necesita actualización de password
+    if (existingClient && !existingClient.password) {
+      await this.updatePasswordClient(existingClient.id, password);
+      return { client: existingClient }; // Retornar cliente actualizado
     }
+
+    // Validar conflictos
+    this.validateClientConflict(existingClient);
 
     return this.createClientWithAccount({
       clientData: { email, name, password, plan },
@@ -165,6 +170,11 @@ export class TransactionOAuthRepository {
     });
   }
 
+  /**
+   * Get a client by id
+   * @param id - The id of the client
+   * @returns The found client or null
+   */
   private async getClientById(id: string) {
     const client = await this.clientRepository.getClientById({ id });
 
@@ -173,5 +183,29 @@ export class TransactionOAuthRepository {
     }
 
     return client;
+  }
+
+  /**
+   * Validate if client already exists with password
+   * @param existingClient - The existing client
+   * @throws ConflictException if user already exists with password
+   */
+  private validateClientConflict(existingClient: Clients | null): void {
+    if (existingClient && existingClient.password) {
+      throw new ConflictException('User already exists');
+    }
+  }
+
+  /**
+   * Update password for existing client
+   * @param id - The id of the client
+   * @param password - The new password
+   * @returns A promise that resolves when the password is updated
+   */
+  private async updatePasswordClient(id: string, password: string | null) {
+    if (!password) {
+      throw new BadRequestException('Password is required');
+    }
+    return this.clientRepository.updatePasswordClient(id, password);
   }
 }

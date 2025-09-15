@@ -58,6 +58,21 @@ export class ClientRepository extends BaseRepository {
 
     return client;
   }
+
+  /**
+   * Update the password of a client
+   * @param id - The id of the client
+   * @param password - The new password
+   * @returns The updated client
+   */
+  public async updatePasswordClient(id: string, password: string) {
+    const updatedClient = await this.prisma.clients.update({
+      where: { id },
+      data: { password },
+    });
+
+    return updatedClient;
+  }
 }
 
 /**
