@@ -1,9 +1,9 @@
-import { nanoid } from 'nanoid';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class IdFactory {
-  public generateId(length: number = 21): string {
+  public async generateId(length: number = 21): Promise<string> {
+    const { nanoid } = await import('nanoid');
     return nanoid(length);
   }
 }

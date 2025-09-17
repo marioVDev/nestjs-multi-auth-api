@@ -2,6 +2,7 @@ import { PrismaService } from 'src/db/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Provider } from '../../dto/client.dto';
 import { Clients, ClientAccount } from 'generated/prisma';
+import { IdFactory } from 'src/comon/factories/id.fatory';
 
 import {
   Injectable,
@@ -33,6 +34,10 @@ export type ResultOAuthOptions =
       client: Clients;
       existingAccount: ClientAccount;
       isNewAccount: boolean;
+    }
+  | {
+      client: Clients;
+      isNewUser: boolean;
     };
 
 /**
@@ -44,6 +49,7 @@ export class TransactionOAuthRepository {
     private clientRepository: ClientRepository,
     private readonly prisma: PrismaService,
     private clientAccountRepository: ClientAccountRepository,
+    private idFactory: IdFactory,
   ) {}
 
   /**
@@ -69,14 +75,23 @@ export class TransactionOAuthRepository {
    * @returns The created user
    */
   private async handleLocalRegistration(data: ClientRegistrationData) {
-    const { email, name, password, plan, provider, providerAccountId } = data;
+    const { email, name, password, plan, provider } = data;
 
     const existingClient = await this.clientRepository.getClientByEmail(email);
 
-    // Si existe cliente y necesita actualización de password
+    // // Si existe cliente y necesita actualización de password
     if (existingClient && !existingClient.password) {
-      await this.updatePasswordClient(existingClient.id, password);
-      return { client: existingClient }; // Retornar cliente actualizado
+      const updatedClient = await this.updatePasswordClient(
+        existingClient.id,
+        password,
+      );
+
+      // Retornar cliente actualizado
+      return { client: updatedClient, isNewUser: false };
+    }
+
+    if (!data.providerAccountId) {
+      data.providerAccountId = await this.generateProviderAccountId();
     }
 
     // Validar conflictos
@@ -84,7 +99,7 @@ export class TransactionOAuthRepository {
 
     return this.createClientWithAccount({
       clientData: { email, name, password, plan },
-      accountData: { provider, providerAccountId },
+      accountData: { provider, providerAccountId: data.providerAccountId },
     });
   }
 
@@ -168,6 +183,10 @@ export class TransactionOAuthRepository {
 
       return { newClient: client };
     });
+  }
+
+  private generateProviderAccountId() {
+    return this.idFactory.generateId();
   }
 
   /**

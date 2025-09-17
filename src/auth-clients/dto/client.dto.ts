@@ -89,7 +89,7 @@ export class CreateClientAccountDto {
 
   @IsNotEmpty()
   @IsString()
-  providerAccountId: string;
+  providerAccountId: string | null;
 }
 
 export class LoginClientDto {

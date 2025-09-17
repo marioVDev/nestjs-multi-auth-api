@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/db/prisma.service';
 import { CreateClientAccountDto, CreateClientDto } from '../dto/client.dto';
 import { BaseRepository } from './base.repository';
@@ -91,6 +91,10 @@ export class ClientAccountRepository extends BaseRepository {
   ) {
     const { provider, providerAccountId } = data;
 
+    if (!providerAccountId) {
+      throw new ConflictException('providerAccountId is required');
+    }
+
     const clientAccount = await this.transaction(
       prismaClient,
     ).clientAccount.create({
@@ -109,6 +113,10 @@ export class ClientAccountRepository extends BaseRepository {
     data: CreateClientAccountDto,
   ) {
     const { provider, providerAccountId } = data;
+
+    if (!providerAccountId) {
+      throw new ConflictException('providerAccountId is required');
+    }
 
     const clientAccount = await this.prisma.clientAccount.findUnique({
       where: { provider_providerAccountId: { provider, providerAccountId } },
