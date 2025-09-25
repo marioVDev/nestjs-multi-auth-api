@@ -37,7 +37,7 @@ export class AuthService {
       const client =
         await this.loginRepository.loginWithPasswordAndEmail(credentials);
 
-      const serverResponse = await this.formatNewRegistrationResponse(client);
+      const serverResponse = await this.formatNewLocalLoginResponse(client);
 
       return serverResponse;
     } catch (err) {
@@ -142,15 +142,15 @@ export class AuthService {
     }
   }
 
-  private async formatNewRegistrationResponse(client: Clients) {
+  private async formatNewLocalLoginResponse(client: Clients) {
     const token = await this.generateToken(client.email, client.id);
 
     return {
       client: this.sanitizeClientResponse(client),
       token,
       authType: client.password ? 'local' : 'oauth',
-      message: 'Registration successful',
-      isNewUser: true,
+      message: 'Login successful',
+      isNewUser: false,
     };
   }
 

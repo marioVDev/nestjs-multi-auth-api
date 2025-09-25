@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { GoogleController } from './services/google.controller';
+import { AuthController } from './services/localAuth/auth.controller';
+import { GoogleController } from './services/googleAuth/google.controller';
 import { GoogleAuthConfig } from 'src/config/googleAuth.config';
 import { TransactionOAuthRepository } from './repositories/transactions/transactionOAuth.repository';
 import { LoginRepository } from './repositories/transactions/login.respository';
@@ -8,12 +8,16 @@ import {
   ClientAccountRepository,
   ClientRepository,
 } from './repositories/client.respository';
-import { GoogleService } from './services/google.service';
+import { GoogleService } from './services/googleAuth/google.service';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt/dist/jwt.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/db/prisma.service';
-import { JwtService } from '@nestjs/jwt/dist/jwt.service';
+import { CommonModule } from 'src/comon/common.module';
+import { AuthLocalService } from './services/localAuth/auth.service';
+import { GithubAutlConfig } from 'src/config/githubAuth.config';
+import { GithubController } from './services/githubAuth/github.controller';
+import { GithubService } from './services/githubAuth/github.service';
 
 @Module({
   imports: [
@@ -28,34 +32,27 @@ import { JwtService } from '@nestjs/jwt/dist/jwt.service';
       }),
       inject: [ConfigService],
     }),
+    CommonModule,
   ],
-  controllers: [AuthController, GoogleController],
+  controllers: [AuthController, GoogleController, GithubController],
   providers: [
-    {
-      provide: 'STATE_JWT',
-      useFactory: (configService: ConfigService) => {
-        return new JwtService({
-          secret: configService.get<string>('JWT_SECRET'),
-          signOptions: { expiresIn: '5m' }, // para el state
-        });
-      },
-      inject: [ConfigService],
-    },
-
     // Services
     AuthService,
     GoogleService,
     PrismaService,
+    GithubService,
 
     // Repositories
     ClientRepository,
     ClientAccountRepository,
     LoginRepository,
     TransactionOAuthRepository,
+    AuthLocalService,
 
     // Configuration
     GoogleAuthConfig,
+    GithubAutlConfig,
   ],
-  exports: [AuthService, GoogleService, JwtModule, 'STATE_JWT'],
+  exports: [AuthService, GoogleService, JwtModule],
 })
 export class AuthModule {}

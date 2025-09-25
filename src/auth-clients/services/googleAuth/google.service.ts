@@ -1,26 +1,18 @@
 import {
   BadRequestException,
   Injectable,
-  Inject,
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
 
 import { GoogleAuthConfig } from 'src/config/googleAuth.config';
 import { google } from 'googleapis';
-import crypto from 'crypto';
 import { Request } from 'express';
 import { URL } from 'url';
 import type oauth2Client from 'googleapis';
 import { AuthService } from '../../auth.service';
 import { PlanType, Provider } from '../../dto/client.dto';
-import { JwtService } from '@nestjs/jwt';
-
-interface StatePayload {
-  csrfToken: string;
-  iat?: number;
-  exp?: number;
-}
+import { StateForCsrf } from 'src/comon/utils/state-for-csrf';
 
 @Injectable()
 export class GoogleService {
@@ -33,7 +25,8 @@ export class GoogleService {
   constructor(
     private readonly googleAuthConfig: GoogleAuthConfig,
     private readonly authService: AuthService,
-    @Inject('STATE_JWT') private readonly stateJwt: JwtService,
+    // @Inject('STATE_JWT') private readonly stateForCsrf: JwtService,
+    private readonly stateJwt: StateForCsrf,
   ) {
     this.clientID = this.googleAuthConfig.getGoogleEnvConfig().clientID;
     this.clientSecret = this.googleAuthConfig.getGoogleEnvConfig().clientSecret;
@@ -54,10 +47,10 @@ export class GoogleService {
    */
   public getAuthUrl() {
     // Generate a unique state parameter
-    const state = this.setState();
+    const state = this.stateJwt.setState();
 
     // Store the state in a JWT
-    const token = this.stateToJWT(state);
+    const token = this.stateJwt.stateToJWT(state);
 
     // Generate the Google OAuth2 authorization URL
     const authorizationUrl = this.oauth2Client.generateAuthUrl({
@@ -71,10 +64,10 @@ export class GoogleService {
     return authorizationUrl;
   }
 
-  public async googleCallbackLogic(code: string, req: Request) {
+  public async googleCallbackLogic(req: Request) {
     try {
       //Validate Session
-      this.verifyStateWithJWT(req);
+      this.stateJwt.verifyStateWithJWT(req);
 
       // Desestructuring user info
       const { id, email, name } = await this.getUserInfo(req);
@@ -125,46 +118,6 @@ export class GoogleService {
     ];
 
     return scopes;
-  }
-
-  /**
-   * Set the OAuth2 state to reduce the risk of CSRF attacks
-   * @returns The OAuth2 state
-   */
-  private setState() {
-    const state = crypto.randomBytes(32).toString('hex');
-
-    return state;
-  }
-
-  /**
-   * Convert the OAuth2 state to a JWT
-   * @param state The OAuth2 state
-   * @returns The JWT
-   */
-  private stateToJWT(state: string) {
-    return this.stateJwt.sign({ state });
-  }
-
-  // Private function for google callback
-
-  /**
-   * Verify the OAuth2 state JWT
-   * @param token The JWT
-   * @returns The decoded state payload
-   */
-  private verifyStateWithJWT(req: Request): StatePayload {
-    try {
-      const token = req.query.state as string;
-
-      if (!token) {
-        throw new UnauthorizedException('Possible CSRF attack detected');
-      }
-
-      return this.stateJwt.verify<StatePayload>(token);
-    } catch (err) {
-      throw new UnauthorizedException('Invalid or expired state');
-    }
   }
 
   /**

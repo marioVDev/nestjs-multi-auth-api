@@ -3,7 +3,6 @@ import {
   Get,
   Req,
   Res,
-  Redirect,
   UnauthorizedException,
   BadRequestException,
   InternalServerErrorException,
@@ -17,20 +16,16 @@ export class GoogleController {
   constructor(private readonly googleService: GoogleService) {}
 
   @Get('')
-  @Redirect()
-  public googleOAuth(@Req() req: Request, @Res() res: Response) {
+  public googleOAuth(@Res() res: Response) {
     const authUrl = this.googleService.getAuthUrl();
 
-    return res.redirect(authUrl);
+    res.redirect(authUrl);
   }
 
   @Get('callback')
   public async googleOAuthCallback(@Req() req: Request, @Res() res: Response) {
     try {
-      const serverResponse = await this.googleService.googleCallbackLogic(
-        req.query.code as string,
-        req,
-      );
+      const serverResponse = await this.googleService.googleCallbackLogic(req);
 
       res.cookie('authToken', serverResponse.token, {
         httpOnly: true,
