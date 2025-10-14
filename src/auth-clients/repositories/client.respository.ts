@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/db/prisma.service';
+import { PrismaService } from '../../db/prisma.service';
 import { CreateClientAccountDto, CreateClientDto } from '../dto/client.dto';
 import { BaseRepository } from './base.repository';
 import { Prisma } from 'generated/prisma';
