@@ -38,8 +38,11 @@ export class ClientRepository extends BaseRepository {
    * @param email - The email of the client
    * @returns The found client or null
    */
-  async getClientByEmail(email: CreateClientDto['email']) {
-    const client = await this.prisma.clients.findUnique({
+  async getClientByEmail(
+    email: CreateClientDto['email'],
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = await this.transaction(prismaClient).clients.findUnique({
       where: { email },
     });
 
