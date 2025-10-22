@@ -54,8 +54,11 @@ export class ClientRepository extends BaseRepository {
    * @param data - The client id
    * @returns The found client or null
    */
-  public async getClientById(data: Pick<Prisma.ClientsWhereUniqueInput, 'id'>) {
-    const client = await this.prisma.clients.findUnique({
+  public async getClientById(
+    data: Pick<Prisma.ClientsWhereUniqueInput, 'id'>,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = await this.transaction(prismaClient).clients.findUnique({
       where: { id: data.id },
     });
 
