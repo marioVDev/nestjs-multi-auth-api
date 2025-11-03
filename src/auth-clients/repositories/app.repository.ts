@@ -27,7 +27,7 @@ export class AppRepository extends BaseRepository {
   ): Promise<App> {
     const { name, description } = data;
 
-    return this.transaction(prismaClient).app.create({
+    const newApp = await this.transaction(prismaClient).app.create({
       data: {
         clientId,
         name,
@@ -35,6 +35,8 @@ export class AppRepository extends BaseRepository {
         description,
       },
     });
+
+    return newApp;
   }
 
   /**
@@ -80,8 +82,12 @@ export class AppRepository extends BaseRepository {
    * @param clientId - ID of the client (To ensure the app belongs to the client).
    * @returns A promise that resolves to the found app or null if not found.
    */
-  async getAppById(appId: string, clientId: string): Promise<App | null> {
-    return this.prisma.app.findFirst({
+  async getAppById(
+    appId: string,
+    clientId: string,
+    prismaClient?: PrismaClient,
+  ): Promise<App | null> {
+    return this.transaction(prismaClient).app.findFirst({
       where: { id: appId, clientId },
     });
   }
@@ -91,8 +97,11 @@ export class AppRepository extends BaseRepository {
    * @param clientId - ID of the client (To ensure the apps belong to the client).
    * @returns A promise that resolves to an array of apps.
    */
-  async getAllAppsByClientId(clientId: string): Promise<App[]> {
-    return this.prisma.app.findMany({
+  async getAllAppsByClientId(
+    clientId: string,
+    prismaClient?: PrismaClient,
+  ): Promise<App[]> {
+    return this.transaction(prismaClient).app.findMany({
       where: { clientId },
     });
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ClientRepository } from '../client.respository';
+import { ClientRepository } from '../client.repository';
 import bcrypt from 'bcrypt';
 import { LoginClientDto } from 'src/auth-clients/dto/client.dto';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';

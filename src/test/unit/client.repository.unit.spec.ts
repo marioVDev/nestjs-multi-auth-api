@@ -3,10 +3,10 @@
 import {
   ClientRepository,
   ClientAccountRepository,
-} from '../client.respository';
+} from '../../auth-clients/repositories/client.repository';
 import { randomUUID } from 'crypto';
-import { PlanType, Provider } from '../../dto/client.dto';
-import { PrismaService } from '../../../db/prisma.service';
+import { PlanType, Provider } from '../../auth-clients/dto/client.dto';
+import { PrismaService } from '../../db/prisma.service';
 
 // Global data
 const email = 'test@example.com';

@@ -13,7 +13,7 @@ import {
 import {
   ClientRepository,
   ClientAccountRepository,
-} from '../client.respository';
+} from '../client.repository';
 
 import {
   ClientRegistrationData,

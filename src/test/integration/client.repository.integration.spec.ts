@@ -1,9 +1,9 @@
 import {
   ClientRepository,
   ClientAccountRepository,
-} from '../client.respository';
-import { PlanType, Provider } from '../../dto/client.dto';
-import { PrismaService } from '../../../db/prisma.service';
+} from '../../auth-clients/repositories/client.repository';
+import { PlanType, Provider } from '../../auth-clients/dto/client.dto';
+import { PrismaService } from '../../db/prisma.service';
 
 // Global data
 const password = 'password123';
@@ -37,7 +37,7 @@ describe('ClientRepository', () => {
   });
 
   afterEach(async () => {
-    // Clean up the database after each test
+    await prismaService.clientAccount.deleteMany({});
     await prismaService.clients.deleteMany({});
   });
 

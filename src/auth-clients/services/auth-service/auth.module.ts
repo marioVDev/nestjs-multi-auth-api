@@ -7,7 +7,7 @@ import { LoginRepository } from '../../repositories/transactions/login.resposito
 import {
   ClientAccountRepository,
   ClientRepository,
-} from '../../repositories/client.respository';
+} from '../../repositories/client.repository';
 import { GoogleService } from './googleAuth/google.service';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt/dist/jwt.module';

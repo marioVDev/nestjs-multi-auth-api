@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from './config/enviroment.config';
 import { ThrottlerModule } from '@nestjs/throttler/dist/throttler.module';
 import { AuthModule } from './auth-clients/services/auth-service/auth.module';
+import { AppClientsModule } from './auth-clients/services/app-service/app.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth-clients/services/auth-service/auth.module';
       },
     ]),
     AuthModule,
+    AppClientsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
